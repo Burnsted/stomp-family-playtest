@@ -1,0 +1,84 @@
+name: Deploy family playtest Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pinned playtest source
+        uses: actions/checkout@v4
+        with:
+          repository: Burnsted/stomp-preview
+          ref: 332321c1cbe797a56281ede0836f84fe0f18985b
+          path: src
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: src/gb-phone/package-lock.json
+
+      - name: Install
+        working-directory: src/gb-phone
+        run: npm ci
+
+      - name: Build static Pages site
+        working-directory: src/gb-phone
+        env:
+          GITHUB_PAGES: "1"
+          GITHUB_PAGES_BASE: /stomp-family-playtest/
+        run: npm run build:pages
+
+      - name: Stamp deployed SHA + playtest README
+        run: |
+          printf '%s\n' '332321c1cbe797a56281ede0836f84fe0f18985b' > src/site-pages/DEPLOYED_SHA.txt
+          cat > src/site-pages/README.md << 'README'
+          # TEMPORARY Family Playtest Preview — SIMULATED · not production
+
+          Isolated fictional-data family playtest for Cameron / Justin / Ted.
+
+          - Live URL: https://burnsted.github.io/stomp-family-playtest/
+          - Deployed SHA: see DEPLOYED_SHA.txt
+          - Production arcade (untouched): https://burnsted.github.io/stomp-preview/
+          README
+          python3 - <<'PY'
+          from pathlib import Path
+          sha = "332321c1cbe797a56281ede0836f84fe0f18985b"
+          meta = f'<meta name="stomp-family-playtest-sha" content="{sha}"/><meta name="stomp-deploy-label" content="FAMILY PLAYTEST · SIMULATED · sha 332321c"/>'
+          for name in ("index.html", "404.html"):
+              p = Path("src/site-pages") / name
+              text = p.read_text(encoding="utf-8").replace("\x00", "")
+              if "stomp-family-playtest-sha" not in text:
+                  text = text.replace("<head>", "<head>" + meta, 1)
+              p.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: src/site-pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
