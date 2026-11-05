@@ -3,8 +3,9 @@
 Isolated fictional-data family playtest for Cameron / Justin / Ted.
 
 - **Live URL:** https://burnsted.github.io/stomp-family-playtest/
-- **Deployed SHA:** `332321c1cbe797a56281ede0836f84fe0f18985b` (also stamped at that URL as `/DEPLOYED_SHA.txt`)
-- **Source draft PR:** https://github.com/Burnsted/stomp-preview/pull/52 (keep draft / do not merge)
+- **Deployed SHA:** `460a3427337c30d9b1dd6e3fc916606fdfbc1065` (also stamped at that URL as `/DEPLOYED_SHA.txt`)
+- **Source draft PR:** https://github.com/Burnsted/stomp-preview/pull/56 (keep draft / do not merge) — Create Your STOMPER journey (t1215u tip)
+- **Previous tip note:** live playtest tip moved off #52 Form #7 OG tip onto #56 onboard tip (family playtest URL only)
 - **Production arcade (untouched):** https://burnsted.github.io/stomp-preview/
 
 ## Hosting note
